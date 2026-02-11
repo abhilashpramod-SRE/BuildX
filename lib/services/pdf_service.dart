@@ -8,6 +8,8 @@ import 'package:pdf/widgets.dart' as pw;
 import '../models/invoice.dart';
 
 class PdfService {
+  static const String _appFolderName = 'BuildX';
+
   Future<File> generateInvoicePdf(Invoice invoice) async {
     final pdf = pw.Document();
 
@@ -87,10 +89,31 @@ class PdfService {
       ),
     );
 
-    final dir = await getApplicationDocumentsDirectory();
-    final stamp = DateTime.now().millisecondsSinceEpoch;
-    final file = File('${dir.path}/${invoice.invoiceNumber}_$stamp.pdf');
+    final appFolder = await _ensureAppFolder();
+    final dateFolder = await _ensureDateFolder(appFolder);
+
+    final safeClient = _sanitizeFileName(invoice.client.name);
+    final day = DateFormat('yyyy-MM-dd').format(DateTime.now());
+    final file = File('${dateFolder.path}/${safeClient}_$day.pdf');
     await file.writeAsBytes(await pdf.save());
     return file;
+  }
+
+  Future<Directory> _ensureAppFolder() async {
+    final root = await getApplicationDocumentsDirectory();
+    final appFolder = Directory('${root.path}/$_appFolderName');
+    if (!await appFolder.exists()) {
+      await appFolder.create(recursive: true);
+    }
+    return appFolder;
+  }
+
+  Future<Directory> _ensureDateFolder(Directory appFolder) async {
+    final day = DateFormat('yyyy-MM-dd').format(DateTime.now());
+    final dateFolder = Directory('${appFolder.path}/$day');
+    if (!await dateFolder.exists()) {
+      await dateFolder.create(recursive: true);
+    }
+    return dateFolder;
   }
 }

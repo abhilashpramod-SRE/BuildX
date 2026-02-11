@@ -28,8 +28,9 @@ Android-first Flutter application for construction expense tracking, supervisor 
 - Consolidated Client Bill page: search client, view all client bills, generate single consolidated PDF with final total
 - Invoice History screen with **multiple download support** (each download creates a new timestamped PDF file)
 - A4 invoice PDF with company details, invoice number, date, client details, itemized list, total amount, watermark
+- Downloaded invoices are saved under `BuildX/<yyyy-MM-dd>/` using `<client_name>_<yyyy-MM-dd>.pdf` (date-wise subfolders created automatically)
 - Offline queue + manual sync toggle
-- Material 3 UI with modern Bottom Navigation + Card Layout
+- Material 3 UI with modern Bottom Navigation + Card Layout (Approvals removed from bottom menu)
 - Navy + Orange professional theme with large tap targets
 - Role-based dashboard tabs for practical field usage
 - Backend abstraction stubs (Firebase/Supabase)

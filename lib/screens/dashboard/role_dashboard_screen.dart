@@ -35,7 +35,6 @@ class _RoleDashboardScreenState extends State<RoleDashboardScreen> {
           ]
         : const <NavigationDestination>[
             NavigationDestination(icon: Icon(Icons.dashboard_outlined), label: 'Dashboard'),
-            NavigationDestination(icon: Icon(Icons.approval), label: 'Approvals'),
             NavigationDestination(icon: Icon(Icons.verified), label: 'Approved Bills'),
             NavigationDestination(icon: Icon(Icons.download), label: 'Generated Bills'),
             NavigationDestination(icon: Icon(Icons.summarize), label: 'Consolidated'),
@@ -93,19 +92,21 @@ class _RoleDashboardScreenState extends State<RoleDashboardScreen> {
       );
     }
 
-    if (_index == 1) return const ApprovalContent();
-    if (_index == 2) return const ApprovedBillsContent();
-    if (_index == 3) return const InvoiceHistoryContent();
-    if (_index == 4) return const ConsolidatedBillContent();
+    if (_index == 1) return const ApprovedBillsContent();
+    if (_index == 2) return const InvoiceHistoryContent();
+    if (_index == 3) return const ConsolidatedBillContent();
 
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
         _cardAction('Bills Pending Approval', Icons.approval, () {
-          setState(() => _index = 1);
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const ApprovalScreen()),
+          );
         }),
         _cardAction('Approved Bills', Icons.verified, () {
-          setState(() => _index = 2);
+          setState(() => _index = 1);
         }),
         _cardAction('Register / Manage Clients', Icons.people, () {
           Navigator.push(
@@ -120,10 +121,10 @@ class _RoleDashboardScreenState extends State<RoleDashboardScreen> {
           );
         }),
         _cardAction('Generated Bills', Icons.download, () {
-          setState(() => _index = 3);
+          setState(() => _index = 2);
         }),
         _cardAction('Consolidated Client Bill', Icons.summarize, () {
-          setState(() => _index = 4);
+          setState(() => _index = 3);
         }),
         const SizedBox(height: 12),
         const ExpenseListWidget(title: 'Approved Bills', approvedOnly: true),
