@@ -47,6 +47,9 @@ class _ClientRegistrationScreenState extends State<ClientRegistrationScreen> {
                 phone: _phoneController.text.trim(),
               );
               if (!mounted) return;
+              _nameController.clear();
+              _addressController.clear();
+              _phoneController.clear();
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text('Client created with ID: ${client.id}')),
               );

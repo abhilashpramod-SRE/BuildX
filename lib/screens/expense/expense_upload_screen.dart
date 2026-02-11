@@ -137,10 +137,18 @@ class _ExpenseUploadScreenState extends State<ExpenseUploadScreen> {
 
                     await vm.submitExpense(expense);
                     if (!mounted) return;
+                    setState(() {
+                      _selectedClient = null;
+                      _itemController.clear();
+                      _amountController.clear();
+                      _projectController.clear();
+                      _notesController.clear();
+                      _imagePath = null;
+                      _selectedDate = DateTime.now();
+                    });
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Submitted for supervisor approval.')),
+                      const SnackBar(content: Text('Submitted for supervisor approval. Form reset for next entry.')),
                     );
-                    Navigator.pop(context);
                   },
             child: const Text('Submit Expense'),
           ),

@@ -11,13 +11,31 @@ import '../invoice/invoice_generation_screen.dart';
 import '../invoice/invoice_history_screen.dart';
 import '../widgets/expense_list_widget.dart';
 
-class RoleDashboardScreen extends StatelessWidget {
+class RoleDashboardScreen extends StatefulWidget {
   const RoleDashboardScreen({super.key});
+
+  @override
+  State<RoleDashboardScreen> createState() => _RoleDashboardScreenState();
+}
+
+class _RoleDashboardScreenState extends State<RoleDashboardScreen> {
+  int _index = 0;
 
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<AppViewModel>();
     final user = vm.currentUser!;
+
+    final destinations = user.role == UserRole.contractor
+        ? const <NavigationDestination>[
+            NavigationDestination(icon: Icon(Icons.dashboard_outlined), label: 'Dashboard'),
+            NavigationDestination(icon: Icon(Icons.receipt_long), label: 'Submitted Bills'),
+          ]
+        : const <NavigationDestination>[
+            NavigationDestination(icon: Icon(Icons.dashboard_outlined), label: 'Dashboard'),
+            NavigationDestination(icon: Icon(Icons.approval), label: 'Approvals'),
+            NavigationDestination(icon: Icon(Icons.download), label: 'Generated Bills'),
+          ];
 
     return Scaffold(
       appBar: AppBar(
@@ -44,82 +62,74 @@ class RoleDashboardScreen extends StatelessWidget {
           )
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          if (user.role == UserRole.contractor) ...[
-            _actionCard(
-              context,
-              'Upload Expense',
-              Icons.upload_file,
-              () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const ExpenseUploadScreen()),
-              ),
-            ),
-            _actionCard(
-              context,
-              'My Submitted Bills',
-              Icons.receipt_long,
-              () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const SubmittedBillsScreen()),
-              ),
-            ),
-          ],
-          if (user.role == UserRole.supervisor) ...[
-            _actionCard(
-              context,
-              'Bills Pending Approval',
-              Icons.approval,
-              () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const ApprovalScreen()),
-              ),
-            ),
-            _actionCard(
-              context,
-              'Register / Manage Clients',
-              Icons.people,
-              () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (_) => const ClientRegistrationScreen()),
-              ),
-            ),
-            _actionCard(
-              context,
-              'Generate Invoice',
-              Icons.receipt_long,
-              () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (_) => const InvoiceGenerationScreen()),
-              ),
-            ),
-            _actionCard(
-              context,
-              'Invoice History & Downloads',
-              Icons.download,
-              () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const InvoiceHistoryScreen()),
-              ),
-            ),
-            const SizedBox(height: 12),
-            const ExpenseListWidget(title: 'Approved Bills', approvedOnly: true),
-          ],
-        ],
+      body: _bodyForRole(user.role),
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _index,
+        onDestinationSelected: (idx) => setState(() => _index = idx),
+        destinations: destinations,
       ),
     );
   }
 
-  Widget _actionCard(
-      BuildContext context, String title, IconData icon, VoidCallback onTap) {
+  Widget _bodyForRole(UserRole role) {
+    if (role == UserRole.contractor) {
+      if (_index == 1) return const SubmittedBillsContent();
+      return ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          _cardAction('Upload Expense', Icons.upload_file, () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const ExpenseUploadScreen()),
+            );
+          }),
+          const SizedBox(height: 12),
+          const ExpenseListWidget(title: 'My Recent Submitted Bills', mineOnly: true),
+        ],
+      );
+    }
+
+    if (_index == 1) {
+      return const ApprovalContent();
+    }
+
+    if (_index == 2) {
+      return const InvoiceHistoryContent();
+    }
+
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        _cardAction('Bills Pending Approval', Icons.approval, () {
+          setState(() => _index = 1);
+        }),
+        _cardAction('Register / Manage Clients', Icons.people, () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const ClientRegistrationScreen()),
+          );
+        }),
+        _cardAction('Generate Invoice', Icons.receipt_long, () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const InvoiceGenerationScreen()),
+          );
+        }),
+        _cardAction('Generated Bills', Icons.download, () {
+          setState(() => _index = 2);
+        }),
+        const SizedBox(height: 12),
+        const ExpenseListWidget(title: 'Approved Bills', approvedOnly: true),
+      ],
+    );
+  }
+
+  Widget _cardAction(String title, IconData icon, VoidCallback onTap) {
     return Card(
       child: ListTile(
+        minVerticalPadding: 14,
         leading: Icon(icon, color: Theme.of(context).colorScheme.secondary),
-        title: Text(title),
+        title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
         trailing: const Icon(Icons.chevron_right),
         onTap: onTap,
       ),

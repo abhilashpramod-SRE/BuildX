@@ -59,8 +59,7 @@ class _InvoiceGenerationScreenState extends State<InvoiceGenerationScreen> {
                 value: true,
                 onChanged: null,
                 title: Text(e.item),
-                subtitle:
-                    Text('₹${e.amount.toStringAsFixed(2)} • ${e.clientName}'),
+                subtitle: Text('₹${e.amount.toStringAsFixed(2)} • ${e.clientName}'),
               )),
           ElevatedButton(
             onPressed: _selectedClient == null || approved.isEmpty
@@ -72,13 +71,21 @@ class _InvoiceGenerationScreenState extends State<InvoiceGenerationScreen> {
                       notes: _notesController.text.trim(),
                     );
 
-                    final pdfFile = await vm.createInvoicePdf(invoice);
                     if (!mounted) return;
+                    setState(() {
+                      _selectedClient = null;
+                      _searchController.clear();
+                      _notesController.clear();
+                    });
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Invoice saved at ${pdfFile.path}')),
+                      SnackBar(
+                        content: Text(
+                          'Invoice ${invoice.invoiceNumber} generated. Open Generated Bills to download.',
+                        ),
+                      ),
                     );
                   },
-            child: const Text('Generate & Download PDF'),
+            child: const Text('Generate Invoice'),
           ),
         ],
       ),

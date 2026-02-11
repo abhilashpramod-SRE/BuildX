@@ -27,6 +27,8 @@ Android-first Flutter application for construction expense tracking, supervisor 
 - Invoice History screen with **multiple download support** (each download creates a new timestamped PDF file)
 - A4 invoice PDF with company details, invoice number, date, client details, itemized list, total amount, watermark
 - Offline queue + manual sync toggle
+- Material 3 UI with modern Bottom Navigation + Card Layout
+- Navy + Orange professional theme with large tap targets
 - Backend abstraction stubs (Firebase/Supabase)
 
 ## Run on Android (Step-by-Step)
@@ -83,11 +85,12 @@ flutter run
 4. Open **Generate Invoice**.
 5. Search/select client.
 6. Generate invoice from approved items.
-7. Verify PDF path snackbar.
+7. Verify invoice generated confirmation.
+8. Open **Generated Bills** and download selected bills.
 
 ### 4) Multiple downloads
 
-1. Open **Invoice History & Downloads**.
+1. Open **Generated Bills**.
 2. Click download on an invoice multiple times.
 3. Confirm each download creates a unique timestamped PDF file.
 

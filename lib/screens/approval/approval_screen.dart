@@ -10,55 +10,76 @@ class ApprovalScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return const Scaffold(
+      appBar: _ApprovalAppBar(),
+      body: ApprovalContent(),
+    );
+  }
+}
+
+class _ApprovalAppBar extends StatelessWidget implements PreferredSizeWidget {
+  const _ApprovalAppBar();
+
+  @override
+  Widget build(BuildContext context) {
+    return AppBar(title: const Text('Pending Approvals'));
+  }
+
+  @override
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+}
+
+class ApprovalContent extends StatelessWidget {
+  const ApprovalContent({super.key});
+
+  @override
+  Widget build(BuildContext context) {
     final vm = context.watch<AppViewModel>();
     final pending = vm.pendingExpenses();
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Pending Approvals')),
-      body: ListView.builder(
-        itemCount: pending.length,
-        itemBuilder: (context, index) {
-          final expense = pending[index];
-          return Card(
-            margin: const EdgeInsets.all(12),
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('${expense.submitter.name} • ${expense.clientName}',
-                      style: Theme.of(context).textTheme.titleMedium),
-                  Text('${expense.item} • ₹${expense.amount.toStringAsFixed(2)}'),
-                  Text(DateFormat('dd MMM yyyy').format(expense.date)),
-                  if (expense.billImagePath != null)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8),
-                      child: Text('Bill Image: ${expense.billImagePath}'),
+    return ListView.builder(
+      itemCount: pending.length,
+      itemBuilder: (context, index) {
+        final expense = pending[index];
+        return Card(
+          margin: const EdgeInsets.all(12),
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('${expense.submitter.name} • ${expense.clientName}',
+                    style: Theme.of(context).textTheme.titleMedium),
+                Text('${expense.item} • ₹${expense.amount.toStringAsFixed(2)}'),
+                Text(DateFormat('dd MMM yyyy').format(expense.date)),
+                if (expense.billImagePath != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Text('Bill Image: ${expense.billImagePath}'),
+                  ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () => vm.approveExpense(expense),
+                        child: const Text('Approve'),
+                      ),
                     ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () => vm.approveExpense(expense),
-                          child: const Text('Approve'),
-                        ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => _reject(context, vm, expense),
+                        child: const Text('Reject'),
                       ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: OutlinedButton(
-                          onPressed: () => _reject(context, vm, expense),
-                          child: const Text('Reject'),
-                        ),
-                      ),
-                    ],
-                  )
-                ],
-              ),
+                    ),
+                  ],
+                )
+              ],
             ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 
