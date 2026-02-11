@@ -99,6 +99,12 @@ class PdfService {
     return file;
   }
 
+  String _sanitizeFileName(String input) {
+    final cleaned = input.trim().replaceAll(RegExp(r'[^a-zA-Z0-9 _-]'), '');
+    final normalized = cleaned.replaceAll(RegExp(r'\s+'), '_');
+    return normalized.isEmpty ? 'client' : normalized;
+  }
+
   Future<Directory> _ensureAppFolder() async {
     final root = await getApplicationDocumentsDirectory();
     final appFolder = Directory('${root.path}/$_appFolderName');
