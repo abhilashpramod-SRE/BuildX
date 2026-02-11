@@ -3,6 +3,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../models/client.dart';
 import '../../models/expense.dart';
 import '../../viewmodels/app_view_model.dart';
 
@@ -17,11 +18,10 @@ class _ExpenseUploadScreenState extends State<ExpenseUploadScreen> {
   final _itemController = TextEditingController();
   final _amountController = TextEditingController();
   final _notesController = TextEditingController();
+  final _projectController = TextEditingController();
   DateTime _selectedDate = DateTime.now();
-  String _selectedProject = 'Tower A';
   String? _imagePath;
-
-  final _projects = ['Tower A', 'Tower B', 'Road Expansion', 'Warehouse'];
+  Client? _selectedClient;
 
   Future<void> _pickImage() async {
     final picker = ImagePicker();
@@ -35,12 +35,33 @@ class _ExpenseUploadScreenState extends State<ExpenseUploadScreen> {
   Widget build(BuildContext context) {
     final vm = context.read<AppViewModel>();
     final user = vm.currentUser!;
+    final clients = vm.allClients();
 
     return Scaffold(
       appBar: AppBar(title: const Text('Upload Expense Bill')),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          if (clients.isEmpty)
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Text(
+                  'No clients found. Please ask Supervisor/Owner to add a client before uploading expenses.',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+              ),
+            ),
+          const SizedBox(height: 8),
+          DropdownButtonFormField<Client>(
+            value: _selectedClient,
+            items: clients
+                .map((c) => DropdownMenuItem(value: c, child: Text(c.name)))
+                .toList(),
+            onChanged: clients.isEmpty ? null : (v) => setState(() => _selectedClient = v),
+            decoration: const InputDecoration(labelText: 'Client *'),
+          ),
+          const SizedBox(height: 12),
           TextField(
             controller: _itemController,
             decoration: const InputDecoration(labelText: 'Item / Description'),
@@ -50,6 +71,14 @@ class _ExpenseUploadScreenState extends State<ExpenseUploadScreen> {
             controller: _amountController,
             keyboardType: TextInputType.number,
             decoration: const InputDecoration(labelText: 'Amount'),
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _projectController,
+            decoration: const InputDecoration(
+              labelText: 'Project (Optional)',
+              helperText: 'Used for contractor-side filtering',
+            ),
           ),
           const SizedBox(height: 12),
           ListTile(
@@ -68,14 +97,6 @@ class _ExpenseUploadScreenState extends State<ExpenseUploadScreen> {
               }
             },
           ),
-          DropdownButtonFormField<String>(
-            value: _selectedProject,
-            items: _projects
-                .map((p) => DropdownMenuItem(value: p, child: Text(p)))
-                .toList(),
-            onChanged: (v) => setState(() => _selectedProject = v!),
-            decoration: const InputDecoration(labelText: 'Project'),
-          ),
           const SizedBox(height: 12),
           OutlinedButton.icon(
             onPressed: _pickImage,
@@ -89,25 +110,38 @@ class _ExpenseUploadScreenState extends State<ExpenseUploadScreen> {
           ),
           const SizedBox(height: 20),
           ElevatedButton(
-            onPressed: () async {
-              final expense = Expense(
-                id: const Uuid().v4(),
-                item: _itemController.text.trim(),
-                amount: double.tryParse(_amountController.text) ?? 0,
-                date: _selectedDate,
-                project: _selectedProject,
-                submitter: user,
-                billImagePath: _imagePath,
-                notes: _notesController.text.trim(),
-              );
+            onPressed: clients.isEmpty
+                ? null
+                : () async {
+                    if (_selectedClient == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Please select a client.')),
+                      );
+                      return;
+                    }
 
-              await vm.submitExpense(expense);
-              if (!mounted) return;
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Submitted for supervisor approval.')),
-              );
-              Navigator.pop(context);
-            },
+                    final expense = Expense(
+                      id: const Uuid().v4(),
+                      item: _itemController.text.trim(),
+                      amount: double.tryParse(_amountController.text) ?? 0,
+                      date: _selectedDate,
+                      clientId: _selectedClient!.id,
+                      clientName: _selectedClient!.name,
+                      submitter: user,
+                      project: _projectController.text.trim().isEmpty
+                          ? null
+                          : _projectController.text.trim(),
+                      billImagePath: _imagePath,
+                      notes: _notesController.text.trim(),
+                    );
+
+                    await vm.submitExpense(expense);
+                    if (!mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Submitted for supervisor approval.')),
+                    );
+                    Navigator.pop(context);
+                  },
             child: const Text('Submit Expense'),
           ),
         ],

@@ -13,7 +13,6 @@ class InvoiceGenerationScreen extends StatefulWidget {
 
 class _InvoiceGenerationScreenState extends State<InvoiceGenerationScreen> {
   final _searchController = TextEditingController();
-  final _projectController = TextEditingController();
   final _notesController = TextEditingController();
 
   Client? _selectedClient;
@@ -22,7 +21,10 @@ class _InvoiceGenerationScreenState extends State<InvoiceGenerationScreen> {
   Widget build(BuildContext context) {
     final vm = context.watch<AppViewModel>();
     final clients = vm.searchClients(_searchController.text);
-    final approved = vm.approvedExpenses();
+    final approved = vm
+        .approvedExpenses()
+        .where((e) => _selectedClient == null || e.clientId == _selectedClient!.id)
+        .toList(growable: false);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Generate Invoice')),
@@ -31,8 +33,8 @@ class _InvoiceGenerationScreenState extends State<InvoiceGenerationScreen> {
         children: [
           TextField(
             controller: _searchController,
-            decoration: const InputDecoration(
-                labelText: 'Search client by name or phone'),
+            decoration:
+                const InputDecoration(labelText: 'Search client by name or phone'),
             onChanged: (_) => setState(() {}),
           ),
           const SizedBox(height: 8),
@@ -48,11 +50,6 @@ class _InvoiceGenerationScreenState extends State<InvoiceGenerationScreen> {
             ),
           const SizedBox(height: 12),
           TextField(
-            controller: _projectController,
-            decoration: const InputDecoration(labelText: 'Project Name'),
-          ),
-          const SizedBox(height: 12),
-          TextField(
             controller: _notesController,
             decoration: const InputDecoration(labelText: 'Optional Notes'),
           ),
@@ -62,15 +59,15 @@ class _InvoiceGenerationScreenState extends State<InvoiceGenerationScreen> {
                 value: true,
                 onChanged: null,
                 title: Text(e.item),
-                subtitle: Text('₹${e.amount.toStringAsFixed(2)} • ${e.project}'),
+                subtitle:
+                    Text('₹${e.amount.toStringAsFixed(2)} • ${e.clientName}'),
               )),
           ElevatedButton(
-            onPressed: _selectedClient == null || _projectController.text.trim().isEmpty
+            onPressed: _selectedClient == null || approved.isEmpty
                 ? null
                 : () async {
                     final invoice = vm.createInvoice(
                       client: _selectedClient!,
-                      projectName: _projectController.text.trim(),
                       items: approved,
                       notes: _notesController.text.trim(),
                     );

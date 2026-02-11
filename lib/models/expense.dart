@@ -8,8 +8,10 @@ class Expense {
     required this.item,
     required this.amount,
     required this.date,
-    required this.project,
+    required this.clientId,
+    required this.clientName,
     required this.submitter,
+    this.project,
     this.billImagePath,
     this.notes,
     this.status = ExpenseStatus.pending,
@@ -20,8 +22,10 @@ class Expense {
   final String item;
   final double amount;
   final DateTime date;
-  final String project;
+  final String clientId;
+  final String clientName;
   final AppUser submitter;
+  final String? project;
   final String? billImagePath;
   final String? notes;
   ExpenseStatus status;

@@ -26,7 +26,7 @@ class ApprovalScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('${expense.submitter.name} • ${expense.project}',
+                  Text('${expense.submitter.name} • ${expense.clientName}',
                       style: Theme.of(context).textTheme.titleMedium),
                   Text('${expense.item} • ₹${expense.amount.toStringAsFixed(2)}'),
                   Text(DateFormat('dd MMM yyyy').format(expense.date)),

@@ -49,8 +49,6 @@ class PdfService {
           pw.Text(invoice.client.address),
           pw.Text('Phone: ${invoice.client.phone}'),
           pw.SizedBox(height: 12),
-          pw.Text('Project: ${invoice.projectName}'),
-          pw.SizedBox(height: 12),
           pw.TableHelper.fromTextArray(
             headers: ['Item', 'Date', 'Amount'],
             data: invoice.items
@@ -90,7 +88,8 @@ class PdfService {
     );
 
     final dir = await getApplicationDocumentsDirectory();
-    final file = File('${dir.path}/${invoice.invoiceNumber}.pdf');
+    final stamp = DateTime.now().millisecondsSinceEpoch;
+    final file = File('${dir.path}/${invoice.invoiceNumber}_$stamp.pdf');
     await file.writeAsBytes(await pdf.save());
     return file;
   }

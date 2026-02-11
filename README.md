@@ -1,61 +1,99 @@
 # BuildX
 
-Android-first Flutter application for construction expense tracking, supervisor approvals, client registration, and invoice PDF generation.
+Android-first Flutter application for construction expense tracking, supervisor approvals, client registration, invoice generation, and PDF downloads.
 
 ## Implemented Scope
 
-- Role-based login (Contractor, Engineer/Procurement, Supervisor/Owner)
-- Role-based dashboard actions
-- Expense upload form with:
+- Role-based login with 2 roles:
+  - Contractor
+  - Supervisor/Owner
+- Login branding with centered **BuildX** and subtitle **Next-Gen Construction Management**
+- Expense upload tied to **Client** (required) with:
   - Item description
   - Amount
+  - Optional project tag (for filtering)
   - Date
-  - Project dropdown
-  - Bill image selection
+  - Bill image upload
   - Notes
+- Contractor Submitted Bills as a dedicated button/screen
+- Contractor filters on submitted bills:
+  - Client
+  - Status
+  - Project
 - Supervisor approval workflow:
-  - Approve / Reject with mandatory reason
-  - Auto-generated invoice draft on approval
-- Client registration with auto-generated client IDs
-- Invoice generation by searching clients and selecting approved expenses
-- A4 PDF invoice generation with company details, invoice metadata, itemized table, total, and watermark
-- Local Android file save path for generated PDF
-- Offline-first queue + manual sync toggle
-- Backend abstraction for Firebase/Supabase integration
-- Audit logs for core actions
+  - Approve
+  - Reject (mandatory reason)
+- Invoice generation from **approved expenses** by selected client
+- Invoice History screen with **multiple download support** (each download creates a new timestamped PDF file)
+- A4 invoice PDF with company details, invoice number, date, client details, itemized list, total amount, watermark
+- Offline queue + manual sync toggle
+- Backend abstraction stubs (Firebase/Supabase)
 
-## Tech Notes
+## Run on Android (Step-by-Step)
 
-- UI: Flutter Material 3 with BuildX palette (navy, orange, white)
-- State management: `provider` + `ChangeNotifier`
-- PDF generation: `pdf` package
-- Storage path: `path_provider`
-- Bill image picker: `image_picker`
+1. Install Flutter SDK, Android Studio, Android SDK.
+2. Verify setup:
 
-## Project Structure
+```bash
+flutter --version
+flutter doctor
+```
 
-- `lib/main.dart` — app bootstrap and DI
-- `lib/models` — domain entities (user, expense, client, invoice, audit)
-- `lib/services` — auth, backend interface, offline sync, PDF generation
-- `lib/repositories` — business logic and local data handling
-- `lib/viewmodels` — UI-facing state and actions
-- `lib/screens` — role dashboards and forms
+3. Install packages:
 
-## Backend Integration
+```bash
+flutter pub get
+```
 
-Current setup uses a pluggable backend interface:
+4. Connect device/start emulator:
 
-- `FirebaseBackendService`
-- `SupabaseBackendService`
+```bash
+flutter devices
+```
 
-Replace placeholder methods in `lib/services/backend_service.dart` with real SDK calls.
+5. Run app:
 
-## Offline Support
-.
-`OfflineSyncService` queues write operations when offline and replays queued actions when back online.
+```bash
+flutter run
+```
 
-## Run
+## Functional Demo (Step-by-Step)
 
-1. Install Flutter SDK.
-2. Run `flutter pub get`.
-3. Run `flutter run` on Android emulator/device.
+### 1) Supervisor prep
+
+1. Login as **Supervisor/Owner**.
+2. Go to **Register / Manage Clients**.
+3. Add one or more clients.
+
+### 2) Contractor expense submission
+
+1. Logout and login as **Contractor**.
+2. Tap **Upload Expense**.
+3. Select a client (required).
+4. Fill item, amount, optional project, date, bill image, notes.
+5. Submit.
+6. Open **My Submitted Bills** button.
+7. Verify list and test filters (client/status/project).
+
+### 3) Supervisor approval and invoice
+
+1. Logout and login as **Supervisor/Owner**.
+2. Open **Bills Pending Approval**.
+3. Approve/reject expenses.
+4. Open **Generate Invoice**.
+5. Search/select client.
+6. Generate invoice from approved items.
+7. Verify PDF path snackbar.
+
+### 4) Multiple downloads
+
+1. Open **Invoice History & Downloads**.
+2. Click download on an invoice multiple times.
+3. Confirm each download creates a unique timestamped PDF file.
+
+### 5) Offline + sync
+
+1. Turn app offline using top switch.
+2. Perform write actions (submit expense, etc.).
+3. Turn online and tap sync icon.
+4. Verify queued actions flush.

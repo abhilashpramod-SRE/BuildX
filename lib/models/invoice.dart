@@ -6,7 +6,6 @@ class Invoice {
     required this.id,
     required this.invoiceNumber,
     required this.client,
-    required this.projectName,
     required this.items,
     required this.date,
     this.notes,
@@ -15,7 +14,6 @@ class Invoice {
   final String id;
   final String invoiceNumber;
   final Client client;
-  final String projectName;
   final List<Expense> items;
   final DateTime date;
   final String? notes;

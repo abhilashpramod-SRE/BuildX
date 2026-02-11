@@ -46,7 +46,7 @@ class ExpenseListWidget extends StatelessWidget {
                   contentPadding: EdgeInsets.zero,
                   title: Text('${e.item} • ₹${e.amount.toStringAsFixed(2)}'),
                   subtitle:
-                      Text('${e.project} • ${DateFormat('dd MMM yyyy').format(e.date)}'),
+                      Text('${e.clientName} • ${DateFormat('dd MMM yyyy').format(e.date)}'),
                   trailing: _statusChip(e.status),
                 ),
               ),

@@ -6,7 +6,9 @@ import '../../viewmodels/app_view_model.dart';
 import '../approval/approval_screen.dart';
 import '../client/client_registration_screen.dart';
 import '../expense/expense_upload_screen.dart';
+import '../expense/submitted_bills_screen.dart';
 import '../invoice/invoice_generation_screen.dart';
+import '../invoice/invoice_history_screen.dart';
 import '../widgets/expense_list_widget.dart';
 
 class RoleDashboardScreen extends StatelessWidget {
@@ -45,7 +47,7 @@ class RoleDashboardScreen extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          if (user.role == UserRole.contractor || user.role == UserRole.engineer) ...[
+          if (user.role == UserRole.contractor) ...[
             _actionCard(
               context,
               'Upload Expense',
@@ -55,8 +57,15 @@ class RoleDashboardScreen extends StatelessWidget {
                 MaterialPageRoute(builder: (_) => const ExpenseUploadScreen()),
               ),
             ),
-            const SizedBox(height: 12),
-            const ExpenseListWidget(title: 'My Submitted Bills', mineOnly: true),
+            _actionCard(
+              context,
+              'My Submitted Bills',
+              Icons.receipt_long,
+              () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const SubmittedBillsScreen()),
+              ),
+            ),
           ],
           if (user.role == UserRole.supervisor) ...[
             _actionCard(
@@ -86,6 +95,15 @@ class RoleDashboardScreen extends StatelessWidget {
                 context,
                 MaterialPageRoute(
                     builder: (_) => const InvoiceGenerationScreen()),
+              ),
+            ),
+            _actionCard(
+              context,
+              'Invoice History & Downloads',
+              Icons.download,
+              () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const InvoiceHistoryScreen()),
               ),
             ),
             const SizedBox(height: 12),

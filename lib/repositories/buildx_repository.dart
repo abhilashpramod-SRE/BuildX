@@ -61,18 +61,17 @@ class BuildXRepository {
       ),
     );
 
-    // Automatic invoice generation on approval.
-    final fallbackClient = _clients.firstWhere(
-      (c) => c.id == 'CL-SYSTEM',
+    final client = _clients.firstWhere(
+      (c) => c.id == expense.clientId,
       orElse: () {
-        final client = Client(
-          id: 'CL-SYSTEM',
-          name: 'Pending Client Assignment',
-          address: 'Update client details before final dispatch',
+        final fallback = Client(
+          id: expense.clientId,
+          name: expense.clientName,
+          address: 'Address pending',
           phone: '-',
         );
-        _clients.add(client);
-        return client;
+        _clients.add(fallback);
+        return fallback;
       },
     );
 
@@ -80,8 +79,7 @@ class BuildXRepository {
       Invoice(
         id: const Uuid().v4(),
         invoiceNumber: 'AUTO-${DateTime.now().millisecondsSinceEpoch}',
-        client: fallbackClient,
-        projectName: expense.project,
+        client: client,
         items: [expense],
         date: DateTime.now(),
         notes: 'Auto-generated on expense approval.',
@@ -141,7 +139,6 @@ class BuildXRepository {
 
   Invoice createInvoice({
     required Client client,
-    required String projectName,
     required List<Expense> items,
     String? notes,
   }) {
@@ -149,7 +146,6 @@ class BuildXRepository {
       id: const Uuid().v4(),
       invoiceNumber: 'INV-${DateTime.now().millisecondsSinceEpoch}',
       client: client,
-      projectName: projectName,
       items: items,
       date: DateTime.now(),
       notes: notes,

@@ -20,53 +20,68 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('BuildX Login')),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            TextField(
-              controller: _identityController,
-              decoration: const InputDecoration(
-                labelText: 'Email or Phone Number',
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const SizedBox(height: 20),
+              const Text(
+                'BuildX',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 34, fontWeight: FontWeight.bold),
               ),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _passwordController,
-              decoration: const InputDecoration(labelText: 'Password'),
-              obscureText: true,
-            ),
-            const SizedBox(height: 12),
-            DropdownButtonFormField<UserRole>(
-              value: _selectedRole,
-              items: UserRole.values
-                  .map(
-                    (role) => DropdownMenuItem(
-                      value: role,
-                      child: Text(role.label),
-                    ),
-                  )
-                  .toList(),
-              onChanged: (value) => setState(() => _selectedRole = value!),
-              decoration: const InputDecoration(labelText: 'Role'),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _loading
-                  ? null
-                  : () async {
-                      setState(() => _loading = true);
-                      await context.read<AppViewModel>().login(
-                            _identityController.text,
-                            _passwordController.text,
-                            _selectedRole,
-                          );
-                      if (mounted) setState(() => _loading = false);
-                    },
-              child: Text(_loading ? 'Logging in...' : 'Login'),
-            ),
-          ],
+              const SizedBox(height: 8),
+              const Text(
+                'Next-Gen Construction Management',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 14),
+              ),
+              const SizedBox(height: 32),
+              TextField(
+                controller: _identityController,
+                decoration: const InputDecoration(
+                  labelText: 'Email or Phone Number',
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: _passwordController,
+                decoration: const InputDecoration(labelText: 'Password'),
+                obscureText: true,
+              ),
+              const SizedBox(height: 12),
+              DropdownButtonFormField<UserRole>(
+                value: _selectedRole,
+                items: UserRole.values
+                    .map(
+                      (role) => DropdownMenuItem(
+                        value: role,
+                        child: Text(role.label),
+                      ),
+                    )
+                    .toList(),
+                onChanged: (value) => setState(() => _selectedRole = value!),
+                decoration: const InputDecoration(labelText: 'Role'),
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: _loading
+                    ? null
+                    : () async {
+                        setState(() => _loading = true);
+                        await context.read<AppViewModel>().login(
+                              _identityController.text,
+                              _passwordController.text,
+                              _selectedRole,
+                            );
+                        if (mounted) setState(() => _loading = false);
+                      },
+                child: Text(_loading ? 'Logging in...' : 'Login'),
+              ),
+            ],
+          ),
         ),
       ),
     );

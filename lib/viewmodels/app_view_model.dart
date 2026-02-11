@@ -26,8 +26,7 @@ class AppViewModel extends ChangeNotifier {
   bool get isOnline => repository.syncService.isOnline;
   int get pendingOfflineActions => repository.syncService.pendingActions;
 
-  Future<void> login(
-      String identity, String password, UserRole role) async {
+  Future<void> login(String identity, String password, UserRole role) async {
     await auth.login(identity: identity, password: password, role: role);
     notifyListeners();
   }
@@ -52,10 +51,33 @@ class AppViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  List<Expense> myExpenses() {
+  List<Expense> myExpenses({
+    String? clientId,
+    ExpenseStatus? status,
+    String? project,
+  }) {
     final user = currentUser;
     if (user == null) return <Expense>[];
-    return repository.expensesByUser(user);
+
+    return repository.expensesByUser(user).where((e) {
+      final clientOk = clientId == null || clientId.isEmpty || e.clientId == clientId;
+      final statusOk = status == null || e.status == status;
+      final projectOk =
+          project == null || project.isEmpty || (e.project ?? '').toLowerCase() == project.toLowerCase();
+      return clientOk && statusOk && projectOk;
+    }).toList(growable: false);
+  }
+
+  List<String> myProjects() {
+    final user = currentUser;
+    if (user == null) return <String>[];
+    final set = <String>{};
+    for (final e in repository.expensesByUser(user)) {
+      if ((e.project ?? '').trim().isNotEmpty) {
+        set.add(e.project!.trim());
+      }
+    }
+    return set.toList()..sort();
   }
 
   List<Expense> pendingExpenses() => repository.pendingExpenses();
@@ -65,12 +87,13 @@ class AppViewModel extends ChangeNotifier {
       .toList(growable: false);
 
   Future<void> approveExpense(Expense expense) async {
-    await repository.approveExpense(expense, actor: currentUser?.name ?? "Supervisor");
+    await repository.approveExpense(expense, actor: currentUser?.name ?? 'Supervisor');
     notifyListeners();
   }
 
   Future<void> rejectExpense(Expense expense, String reason) async {
-    await repository.rejectExpense(expense, reason, actor: currentUser?.name ?? "Supervisor");
+    await repository.rejectExpense(expense, reason,
+        actor: currentUser?.name ?? 'Supervisor');
     notifyListeners();
   }
 
@@ -87,15 +110,15 @@ class AppViewModel extends ChangeNotifier {
 
   List<Client> searchClients(String query) => repository.searchClients(query);
 
+  List<Client> allClients() => repository.clients;
+
   Invoice createInvoice({
     required Client client,
-    required String projectName,
     required List<Expense> items,
     String? notes,
   }) {
     final invoice = repository.createInvoice(
       client: client,
-      projectName: projectName,
       items: items,
       notes: notes,
     );
@@ -103,7 +126,7 @@ class AppViewModel extends ChangeNotifier {
     return invoice;
   }
 
-  Future<File> createInvoicePdf(Invoice invoice) {
-    return pdfService.generateInvoicePdf(invoice);
-  }
+  List<Invoice> invoiceHistory() => repository.invoices.reversed.toList(growable: false);
+
+  Future<File> createInvoicePdf(Invoice invoice) => pdfService.generateInvoicePdf(invoice);
 }
